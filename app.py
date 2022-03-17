@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc, Output, Input
+from dash import Dash, html, dcc, Output, Input, State, callback_context
 import pandas as pd
 import plotly.express as px
 from plotly.basedatatypes import BaseFigure
@@ -118,6 +118,24 @@ def update_view(university_names):
             "" if len(faculty_keywords) == 0 else faculty_keywords [0], publication_keywords,
             "" if len(publication_keywords) == 0 else publication_keywords [0],
             "")
+
+
+@app.callback([Output("enlarge_idget_body", "children"), Output ("enlarge_widget", "Is open"), Output("enlarge_widget_title", "children"), Output("enlarge_widget_title", "style")],
+              [Input (view, "n_clicks") for view in view_options],
+              [State("enlarge_widget", "is_open"), State("graph1", "children"), State("graph2", "children"), State("faculty_Info_wrapper", "children"), State("chart1", "children"), State("chart2", "children"), State("graph3", "children")]) 
+def enlarge_widget(v1, v2, v3, v4, v5, V6, enlarge_widget_is_open: bool, graph1_c, graph2_c, faculty_info_c, chart1_c, chart2_c, graph3_c):
+    try:
+        idx: int=view_options.index([p['prop_id'] for p in callback_context.triggered][0][:-9])
+        modal_widget = graph3_c
+        if idx == 0: modal_widget = graph1_c
+        if idx == 1: modal_widget = graph2_c
+        if idx == 2:
+            del faculty_info_c["props"]["id"]
+            modal_widget = faculty_info_c
+        if idx == 3: modal_widget = chart1_c
+        if idx == 4: modal_widget = chart2_c
+        return (modal_widget, True, view_options[idx], {"fontheight":"bold", "color":view_options_title_color[idx]}) 
+    except ValueError: return ([], False, {})
 
 
 if __name__ == "__main__": app.run_server(debug=True)
