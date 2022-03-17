@@ -6,17 +6,17 @@ from plotly.basedatatypes import BaseFigure
 import dash_bootstrap_components as dbc
 from db import DB
 
-data_set: DB =  DB()
+data_set: DB = DB()
 app: Dash = Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.CYBORG])
 app.title="CS 411: Final Project"
 background_color: str = "rgb(17,17,17)"
-view_options: list = [s.upper() for s in ["University Publications Over Time", "University Number of Faculty With Atleast N-Publications", "Faculty Page", "Top Faculty Results Based On Keywords", "T "]]
+view_options: list = [s.upper() for s in ["University Publications Over Time", "University Number of Faculty With Atleast N-Publications", "Faculty Page", "Top Faculty Results Based On Keywords", "Top Publication Results Based On Keywords", "University Faculty Type Distribution"]]
 view_options_title_color= ["pink", "yellow", "#66fcf1", "lightgreen", "Befe2ba", "#FFCA80"]
 
 
 widgets = [
-            [html.Button(html.H5(view_options[0], style={"textAlign":"center", "color":view_options_title_color[0], "fontWeight":"bold", "margin":"8"}), view_options[0], 0, style={"margin":"auto"})],
-            [html.Button(html.H5(view_options[1].replace("N-", f"{0}-"), "title2", style={"textAlign":"center", "color":view_options_title_color[1], "fontWeight":"bold", "margin":"8"}), view_options[1])],
+            [html.Button(html.H5(view_options[0], style={"textAlign":"center", "color":view_options_title_color[0], "fontWeight":"bold", "margin":"8"}), view_options[0], 0, style={"margin":"auto"}), html.Div(id="graph1")],
+            [html.Button(html.H5(view_options[1].replace("N-", f"{0}-"), "title2", style={"textAlign":"center", "color":view_options_title_color[1], "fontWeight":"bold", "margin":"8"}), view_options[1]), dcc.Slider(1, 1, 1, value=1, id="number_of_min_publications_slider"), html.Div(id="graph2")],
             [
                 html.Button(html.H5(view_options[2], style={"textAlign":"center", "fontWeight":"bold", "margin":"0", "color":view_options_title_color[2]}), view_options[2], 0, style={"margin":"auto"}),
                 dbc.Modal(
@@ -27,10 +27,10 @@ widgets = [
                                 html.Tr([html.Td("POSITION:", style={"paddingRight":"1%", "color":"white", "fontWeight":"bold", "textAlign":"right", "minWidth": "150px"}), html.Td(dcc.Input(id="edit_position_input"))]),
                                 html.Tr([html.Td("EMAIL ADDRESS:", style={"paddingRight":"1%", "color":"white", "fontWeight":"bold", "textAlign":"right"}), html.Td(dcc.Input(id="edit_email_input", type="text"))]),
                                 html.Tr([html.Td("PHONE NUMBER:", style={"paddingRight": "1%", "color":"white", "fontHeight":"bold", "textAlign":"right"}), html.Td(dcc.Input(id="edit_phone_input", type="text"))]),
-                                html.Tr([html.Td("RESEARCH AREA:", style={"paddingRight":"1%", "color":"white", "fontHeight":"bold", "textAlign":"right"}), html.Td(dcc.Input (id="edit research_input", type="text"))])
+                                html.Tr([html.Td("RESEARCH AREA:", style={"paddingRight":"1%", "color":"white", "fontHeight":"bold", "textAlign":"right"}), html.Td(dcc.Input (id="edit_research_input", type="text"))])
                             ]))),
-                        dbc.ModalFooter([html.Div(dbc.Button("Submit", "edit_modal_submit", "ms-auto", n_clicks=0, style={"background":"green", "borderColor":"green", "borderRadius":"10px"}), style={})])
-                    ], "edit_modal", size="ig", is_open=False),
+                        dbc.ModalFooter([html.Div(dbc.Button("Submit", "edit_modal_submit", "ms-auto", n_clicks=0, style={"background":"green", "borderColor":"green", "borderRadius":"10px"}), style={}), html.Div(dbc.Button("Submit", "edit_modal_close", "ms-auto", n_clicks=0, style={"background":"red", "borderColor":"red", "borderRadius":"10px"}), style={})])
+                    ], "edit_modal", size="lg", is_open=False),
                 dbc.Modal(
                     [
                         dbc.ModalHeader(dbc.ModalTitle("ADD FACULTY MENU", style={"textAlign":"center", "color":view_options_title_color[2], "fontWeight": "bold"})), 
@@ -44,27 +44,27 @@ widgets = [
                                 html.Tr([html.Td("RESEARCH AREA:", style={"paddingRight":"1%", "color":"white", "fontWeight": "bold", "textAlign": "right"}), html.Td(dcc.Input(id="add_research_input", type="text"))]),
                                 html.Tr([html.Td("PHOTO URL:", style={"paddingRight":"1%", "color": "white", "fontWeight":"bold", "textAlign":"right"}), html.Td(dcc.Input(id="add_photo_input", type="text"))])
                             ]))),
-                        dbc.ModalFooter([html.Div(dbc.Button("Submit", "add_modal_submit", "ms-auto", style={"background": "green", "borderColor":"green", "borderRadius":"10px"}, n_clicks=0), style={})])
+                        dbc.ModalFooter([html.Div(dbc.Button("Submit", "add_modal_submit", "ms-auto", style={"background": "green", "borderColor":"green", "borderRadius":"10px"}, n_clicks=0), style={}), html.Div(dbc.Button("Submit", "add_modal_close", "ms-auto", n_clicks=0, style={"background":"red", "borderColor":"red", "borderRadius":"10px"}), style={})])
                     ], "add_modal", size="lg", is_open=False),
                 html.Table([html.Tbody([html.Tr(
                     [
                         html.Td(dcc.Dropdown(clearable=False, id="Faculty_name_dropdown"), style={"width": "100%", "paddingRight":"10%", "paddingLeft":"50px", "color":"black"}),
-                        html.Td(html.Button(html.Img(src="https://img.icons8.com/nolan/512/edit--vi.png", height=40, width=40), id="edit button", n_clicks=0, style={"background":background_color, "borderRadius":"20px"}), style={"minWidth": ""}),
+                        html.Td(html.Button(html.Img(src="https://img.icons8.com/nolan/512/edit--v1.png", height=40, width=40), id="edit_button", n_clicks=0, style={"background":background_color, "borderRadius":"20px"}), style={"minWidth": ""}),
                         html.Td(html.Button(html.Img(src="https://img.icons8.com/plasticine/512/000000/filled-trash.png", height=40, width=40), id="delete_button", n_clicks=0, style={"background":background_color, "borderRadius":"20px"}), style={"minWidth": ""}),
                         html.Td(html.Button(html.Img(src="https://img.icons8.com/color/512/eeeeee/add--vi.png", height=40, width=40), id="add_button", n_clicks=0, style={"background":background_color, "borderRadius":"20px"}), style={"minWidth": ""})
                     ])])], style={"marginTop":"2%", "marginBottom":"2%", "textAlign":"center"}),
                 html.Div(html.Div(id="faculty_info", style={"display": "flex", "flexDirection": "row"}), "faculty_info_wrapper")
             ],
-            [html.Button(html.H5(view_options[3], style={"textAlign":"center", "color":view_options_title_color[3], "fontWeight":"bold", "margin":"0"}), view_options[3], 0, style={"margin":"auto", "display": "block", "border":"none"})],
-            [html.Button(html.H5(view_options[4], style={"textAlign":"center", "color":view_options_title_color[4], "fontWeight":"bold", "margin":"0"}), view_options[4], 0, style={"margin":"auto", "display": "block", "border":"none"})],
-            [html.Button(html.H5(view_options[5], style={"textAlign":"center", "color":view_options_title_color[5], "fontWeight":"bold", "margin":"0"}), view_options[5], 0, style={"margin":"auto", "display": "block", "border":"none"})] 
+            [html.Button(html.H5(view_options[3], style={"textAlign":"center", "color":view_options_title_color[3], "fontWeight":"bold", "margin":"0"}), view_options[3], 0, style={"margin":"auto", "display": "block", "border":"none"}), dcc.Dropdown(id="faculty_Keywords_dropdown"), html.Div(id="chart1")],
+            [html.Button(html.H5(view_options[4], style={"textAlign":"center", "color":view_options_title_color[4], "fontWeight":"bold", "margin":"0"}), view_options[4], 0, style={"margin":"auto", "display": "block", "border":"none"}), dcc.Dropdown(id="publication_Keywords_dropdown"), html.Div(id="chart2")],
+            [html.Button(html.H5(view_options[5], style={"textAlign":"center", "color":view_options_title_color[5], "fontWeight":"bold", "margin":"0"}), view_options[5], 0, style={"margin":"auto", "display": "block", "border":"none"}), html.Div(id="graph3")] 
          ]
 
 
 
 app.layout = html.Div([
     dbc.Modal([dbc.ModalHeader(dbc.ModalTitle(id="enlarge_widget_title"), close_button=True), dbc.ModalBody(id="enlarge_widget_body")], "enlarge_widget", size="xl", is_open=False, centered=True),
-    html.Div([html.Div(style={"margin":"auto", "flex": 4}, children=[dcc.Dropdown([data_set.Affiliation_df["Affiliation_name"]], "", True, False, id="Affiliation_name_dropdown", style={"textAlign":"center", "color":"black", "margin": "auto", "paddingLeft":"5%"})]), html.Div(html.Img(src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1200px-No_image_available.svg.png", id="Affiliation_photo", height=95, width=150, style={"display":"block", "margin":"auto", "background":"white", "border":"2px solid grey", "borderRadius":"20px"}), style={"flex": 1, "paddingLeft":"1%"})], style={"display": "flex", "flexDirection": "row", "margin":"auto", "paddingTop":"5px", "paddingBottom":"5px"}), 
+    html.Div([html.Div(style={"margin":"auto", "flex": 4}, children=[dcc.Dropdown(data_set.Affiliation_df["Affiliation_name"], "", True, False, id="Affiliation_name_dropdown", style={"textAlign":"center", "color":"black", "margin": "auto", "paddingLeft":"5%"})]), html.Div(html.Img(src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1200px-No_image_available.svg.png", id="Affiliation_photo", height=95, width=150, style={"display":"block", "margin":"auto", "background":"white", "border":"2px solid grey", "borderRadius":"20px"}), style={"flex": 1, "paddingLeft":"1%"})], style={"display": "flex", "flexDirection": "row", "margin":"auto", "paddingTop":"5px", "paddingBottom":"5px"}), 
     html.Table(html.Tbody(
         [html.Tr([
                     html.Td(html.Div(widgets[0], style={"border":"5px solid red", "borderRadius":"20px", "margin":"auto", "background":background_color, "height":"420px"}), style={"paddingLeft":"5px", "paddingRight":"5px", "paddingBottom":"5px"}), 
@@ -84,17 +84,17 @@ app.layout = html.Div([
 
 
 #CALLBACKS
-app.callback([Output("Affiliation_photo", "src"), Output("Affiliation_photo", "alt"), Output("graph1", "children"), Output ("graph3", "children"), Output("number_of_min_publications_slider", "value"), Output("faculty_Keywords_dropdown", "")],
+@app.callback([Output("Affiliation_photo", "src"), Output("Affiliation_photo", "alt"), Output("graph1", "children"), Output ("graph3", "children"), Output("number_of_min_publications_slider", "value"), Output("faculty_Keywords_dropdown", "options"), Output("faculty_Keywords_dropdown", "value"), Output("publication_Keywords_dropdown", "options"), Output("publication_Keywords_dropdown", "value"), Output("faculty_info_widget_change_trigger", "children")],
               Input("Affiliation_name_dropdown", "value"))
 def update_view(university_names):
     if university_names is None or university_names == "" or len(university_names) == 0: 
-        return ("https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/ho_image_available.svg/1280px No image available.svg.png", "", [], [], 1, [], "", "", "")
+        return ("https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1200px-No_image_available.svg.png", "", [], [], 1, [], "", [], "", "")
     university_names = [university_names] if isinstance(university_names, str) else university_names
     df1: pd.DataFrame = (data_set.Publication_df[data_set.Publication_df ["Year"] > 0][["Publication_id", "Year"]]
                                  .join(data_set.Publish_df[["Publication_id","Faculty_id"]].set_index("Publication_id"), on="Publication_id")
                                  .join(data_set.Faculty_df[["Faculty_id","Affiliation_id"]].set_index("Faculty_id"), on="Faculty_id")
-                                 .join(data_set.Affiliation_df[["Affiliation_id","affiliation_name"]].set_index("Affiliation_id"), on="Affiliation_id")[["Year", "Aff111ation_name"]])
-    fig1: BaseFigure = px.bar(df1[df1["Affiliation_nane"].isin(university_names)].value_counts().rename_axis(["year","university"]).reset_index(nane="Number of Publication(s)"), x="Year", y="Number of Publication(s)", template = "plotly_dork")
+                                 .join(data_set.Affiliation_df[["Affiliation_id","Affiliation_name"]].set_index("Affiliation_id"), on="Affiliation_id")[["Year", "Affiliation_name"]])
+    fig1: BaseFigure = px.bar(df1[df1["Affiliation_name"].isin(university_names)].value_counts().rename_axis(["Year","university"]).reset_index(name="Number of Publication(s)"), x="Year", y="Number of Publication(s)", template = "plotly_dark")
     fig1.update_layout(plot_bgcolor="#23252F", font = {"family": "courier"}, legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
     df2: pd.DataFrame = (data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"].isin(university_names) ][["Affiliation_id"]]
                                  .join(data_set.Faculty_df[["Faculty_id","Affiliation_id"]].set_index("Affiliation_id"), on="Affiliation_id")
@@ -111,19 +111,20 @@ def update_view(university_names):
     fig2: BaseFigure = px.bar(pd.DataFrame(graph3_data), y="Position", x=university_names, template= "plotly_dark", height=350) 
     fig2.update_layout(plot_bgcolor="#23262F", font = {"family" : "courier"})
     return (data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"] == university_names[-1]]["Affiliation_photoUrl"].iloc[0], 
-            university_names [-1],
+            university_names[-1],
             dcc.Graph(figure=fig1),
             dcc.Graph(figure=fig2),
             1,
             faculty_keywords,
-            "" if len(faculty_keywords) == 0 else faculty_keywords [0], publication_keywords,
-            "" if len(publication_keywords) == 0 else publication_keywords [0],
+            "" if len(faculty_keywords) == 0 else faculty_keywords[0], 
+            publication_keywords,
+            "" if len(publication_keywords) == 0 else publication_keywords[0],
             "")
 
 
-@app.callback([Output("enlarge_idget_body", "children"), Output ("enlarge_widget", "Is open"), Output("enlarge_widget_title", "children"), Output("enlarge_widget_title", "style")],
+@app.callback([Output("enlarge_widget_body", "children"), Output ("enlarge_widget", "is_open"), Output("enlarge_widget_title", "children"), Output("enlarge_widget_title", "style")],
               [Input (view, "n_clicks") for view in view_options],
-              [State("enlarge_widget", "is_open"), State("graph1", "children"), State("graph2", "children"), State("faculty_Info_wrapper", "children"), State("chart1", "children"), State("chart2", "children"), State("graph3", "children")]) 
+              [State("enlarge_widget", "is_open"), State("graph1", "children"), State("graph2", "children"), State("faculty_info_wrapper", "children"), State("chart1", "children"), State("chart2", "children"), State("graph3", "children")]) 
 def enlarge_widget(v1, v2, v3, v4, v5, V6, enlarge_widget_is_open: bool, graph1_c, graph2_c, faculty_info_c, chart1_c, chart2_c, graph3_c):
     try:
         idx: int=view_options.index([p['prop_id'] for p in callback_context.triggered][0][:-9])
@@ -136,11 +137,11 @@ def enlarge_widget(v1, v2, v3, v4, v5, V6, enlarge_widget_is_open: bool, graph1_
         if idx == 3: modal_widget = chart1_c
         if idx == 4: modal_widget = chart2_c
         return (modal_widget, True, view_options[idx], {"fontheight":"bold", "color":view_options_title_color[idx]}) 
-    except ValueError: return ([], False, {})
+    except ValueError: return ([], False, "", {})
 
 
 
-app.callback([Output ("graph?", "children"), Output ("title2", "children"), Output("number of min publications slide", "max"), Output("number of ain_publications slide", "marks")], 
+@app.callback([Output ("graph?", "children"), Output ("title2", "children"), Output("number of min publications slide", "max"), Output("number of ain_publications slide", "marks")], 
               Input("number of min publications_slider", "value"),
              [State("Affiliation_name_dropdown", "value"), State("number_of_in_publications s11der", "max"), State("number_of_in_publications slider", "marks")])
 def generate_graph_for_university_faculty_with_atleast_n_publications(num_publications: int, university_names, max_slider: int, marks_slider: dict):
@@ -151,7 +152,7 @@ def generate_graph_for_university_faculty_with_atleast_n_publications(num_public
                                                             .join(data_set.Faculty_df[["Faculty_id", "Affiliation_id"]].set_index("Faculty_id"), on="Faculty_id")
                                                             .join(data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"].isin(university_names)][["Affiliation_id", "Affiliation_name"]].set_index("Affiliation_id", on="Affiliation_id"))
                                                             .sort_values(by=[f"Number of Faculty with {num_publications} or more publication(s)"], ascending=True))
-    fig2: BaseFigure = px.bar(df2, x=f"Number of Faculty with {num_publications} or more publication(s)", y="University name(s)", height=2000(len(df2.index)+8)/len(data_set.Affiliation_df.index), template="plotly_dark")
+    fig2: BaseFigure = px.bar(df2, x=f"Number of Faculty with {num_publications} or more publication(s)", y="University name(s)", height=2000*(len(df2.index)+8)/len(data_set.Affiliation_df.index), template="plotly_dark")
     fig2.update_layout(plot_bgcolor="#23262", font={"family": "courier"})
     graph_out = dcc.Graph(figure=fig2)
     try: max_pub: int = int((data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"].isin(university_names)]
@@ -169,7 +170,7 @@ def generate_graph_for_university_faculty_with_atleast_n_publications(num_public
 
 
 @app.callback(Output("charti", "children"),
-              Input("publication_Keywords_dropdown","value"),
+              Input("faculty_Keywords_dropdown","value"),
               State("Affiliation_name_dropdown", "value"))
 def generate_table_by_keyword_faculty (keyword: str, university_names):
     university_names = [university_names] if isinstance(university_names, str) else university_names
@@ -193,19 +194,19 @@ def generate_table_by_keyword_publication(keyword: str, university_names):
     if len(university_names) == 0: return []
     df2: pd.DataFrame = (data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"].isin(university_names)][["Affiliation_id","Affiliation_name"]]
                                  .join(data_set.Faculty_df[["Faculty_id", "Affiliation_id"]].set_index("Affiliation_id"), on="Affiliation_id")
-                                 .join(data_set.Publish_df.set_index("Farulty_id"), on="Faculty_id")
-                                 .join(data_set.Publication_keyword_df.set_index("Publication id"), on="Publication id")
-                                 .join(data_set.Publication_df[["Publication_id","Title","year"]].set_index("Publication_id"), on="Publication_id")
+                                 .join(data_set.Publish_df.set_index("Faculty_id"), on="Faculty_id")
+                                 .join(data_set.Publication_keyword_df.set_index("Publication_id"), on="Publication_id")
+                                 .join(data_set.Publication_df[["Publication_id","Title","Year"]].set_index("Publication_id"), on="Publication_id")
                                  .join(data_set.Keyword_df.set_index("Keyword_id"), on="Keyword_id"))[["Affiliation_name","Publication_score","Keyword_name"]]
     df2: list = df2[df2["Keyword_name"] == keyword][["Affiliation_name", "Publication_score"]]
-    fig2: BaseFigure = px.pie(values=[df2[df2["Affiliation_name"]==u]["Publication_score"].sum() for u in university_names], names=university_names, template="plotly dark", height=300)
+    fig2: BaseFigure = px.pie(values=[df2[df2["Affiliation_name"]==u]["Publication_score"].sum() for u in university_names], names=university_names, template="plotly_dark", height=300)
     fig2.update_layout(plot_bgcolor="#232621", font={"family": "courier"})
     return dcc.Graph(figure=fig2)
 
 
 
-@app.callback([Output("faculty_info", "children"), Output ("edit_modal", "is_apon"), Output ("add_modal", "is_open"), Output ("Faculty_name_dropdown","options"), Output("Faculty_name_dropdown", "value")],
-              [Input("faculty_info_widget_change trigger", "children"), Input("Faculty_name_dropdown", "value"), Input("delete_button", "n_clicks"), Input("edit_button", "n_clicks"), Input("add_button", "n_clicks"), Input("edit_modal_close", "n_clicks"), Input("edit_modal_submit", "n_clicks"), Input("add_modal_close", "n_clicks"), Input("add_modal_submit", "n_clicks")],
+@app.callback([Output("faculty_info", "children"), Output ("edit_modal", "is_open"), Output ("add_modal", "is_open"), Output ("Faculty_name_dropdown","options"), Output("Faculty_name_dropdown", "value")],
+              [Input("faculty_info_widget_change_trigger", "children"), Input("Faculty_name_dropdown", "value"), Input("delete_button", "n_clicks"), Input("edit_button", "n_clicks"), Input("add_button", "n_clicks"), Input("edit_modal_close", "n_clicks"), Input("edit_modal_submit", "n_clicks"), Input("add_modal_close", "n_clicks"), Input("add_modal_submit", "n_clicks")],
               [State("edit_modal", "is_open"), State("add_modal", "is_open"), State("edit_position_input", "value"), State("edit_email_input", "value"), State("edit_phone_input", "value"), State("edit_research_input", "value"), State("add_name_input", "value"), State("add_position_input", "value"), State("add_email_input", "value"), State("add_phone_input", "value"), State("add_research_input", "value"), State("add_university_input", "value"), State("add_photo_input", "value"), State("Affiliation_name_dropdown", "value")])
 def generate_faculty_page(change_trigger, faculty_name: str, del_btn: int, edit_btn: int, add_btn: int, edit_close_btn: int, edit_submit_btn: int, add_close_btn: int, add_submit_btn: int, edit_is_open: bool, add_is_open: bool, edit_pos_val, edit_email_val, edit_phone_val, edit_research_val, add_name_val, add_pos_val, add_email_val, add_phone, add_research_val, add_university, add_photo, university_names):
     if len(university_names) == 0: return ([], False, False, [], "")
@@ -250,7 +251,7 @@ def generate_faculty_page(change_trigger, faculty_name: str, del_btn: int, edit_
     data: list = [("--" if not isinstance(fac_data[l], str) and isnan(fac_data[l]) else fac_data[l]) for l in ["Faculty_name", "Position", "Email", "Phone_Number", "Research_interest"]] + [len(data_set.Publish_df[data_set.Publish_df["Faculty_id"] == fac_data["Faculty_id"]])]
     try: data.append(data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_id"] == fac_data["Affiliation_id"]]["Affiliation_name"].iloc[0])
     except: data.append("--")
-    return ([html.Img(src=fac_data("Faculty_photourl"), alt=faculty_name, height=300, width=240, style={"display":"block", "margin":"auto", "borderRadius":"20px", "padding":"10px", "flex":1}), html.Table([html.Tbody([html.Tr([html.Td(l), html.Td(d)]) for (l, d) in zip(labels, data)])])],
+    return ([html.Img(src=fac_data["Faculty_photoUrl"], alt=faculty_name, height=300, width=240, style={"display":"block", "margin":"auto", "borderRadius":"20px", "padding":"10px", "flex":1}), html.Table([html.Tbody([html.Tr([html.Td(l), html.Td(d)]) for (l, d) in zip(labels, data)])])],
             edit_is_open,
             add_is_open,
             faculties,
