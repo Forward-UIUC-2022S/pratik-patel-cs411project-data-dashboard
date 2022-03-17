@@ -1,4 +1,4 @@
-from dataclasses import replace
+from math import isnan
 from dash import Dash, html, dcc, Output, Input, State, callback_context
 import pandas as pd
 import plotly.express as px
@@ -24,7 +24,7 @@ widgets = [
                         dbc.ModalHeader(dbc.ModalTitle("EDIT FACULTY MENU", style={"textAlign":"center", "color":view_options_title_color[2], "fontWeight":"bold"})),
                         dbc.ModalBody(html.Table(html.Tbody(
                             [
-                                html.Tr([html.Td("POSITION:", style={"paddingRight":"1%", "color":"white", "fontWeight":"bold", "textAlign":"right", "minWidth": "150px"}), html.Td(dcc.Input(id="edit_position"))]),
+                                html.Tr([html.Td("POSITION:", style={"paddingRight":"1%", "color":"white", "fontWeight":"bold", "textAlign":"right", "minWidth": "150px"}), html.Td(dcc.Input(id="edit_position_input"))]),
                                 html.Tr([html.Td("EMAIL ADDRESS:", style={"paddingRight":"1%", "color":"white", "fontWeight":"bold", "textAlign":"right"}), html.Td(dcc.Input(id="edit_email_input", type="text"))]),
                                 html.Tr([html.Td("PHONE NUMBER:", style={"paddingRight": "1%", "color":"white", "fontHeight":"bold", "textAlign":"right"}), html.Td(dcc.Input(id="edit_phone_input", type="text"))]),
                                 html.Tr([html.Td("RESEARCH AREA:", style={"paddingRight":"1%", "color":"white", "fontHeight":"bold", "textAlign":"right"}), html.Td(dcc.Input (id="edit research_input", type="text"))])
@@ -36,11 +36,11 @@ widgets = [
                         dbc.ModalHeader(dbc.ModalTitle("ADD FACULTY MENU", style={"textAlign":"center", "color":view_options_title_color[2], "fontWeight": "bold"})), 
                         dbc.ModalBody(html.Table(html.Tbody(
                             [
-                                html.Tr([html.Td("FACULTY NAME:", style={"paddingRight":"1%", "color":"white", "fontWeight":"bold", "textAlign":"right", "minWidth": "150px"}), html.Td(dcc.Input(id="add_nam"))]),
+                                html.Tr([html.Td("FACULTY NAME:", style={"paddingRight":"1%", "color":"white", "fontWeight":"bold", "textAlign":"right", "minWidth": "150px"}), html.Td(dcc.Input(id="add_name_input"))]),
                                 html.Tr([html.Td("POSITION:", style={"paddingRight":"1%", "color":"white", "fontWeight":"bold", "textAlign":"right"}), html.Td(dcc.Input(id="add_position_input", type="text"))]),
                                 html.Tr([html.Td("EMAIL ADDRESS:", style={"paddingRight":"1%", "color":"white", "fontWeight":"bold", "textAlign":"right"}), html.Td(dcc.Input(id="add_email_input", type="text"))]),
                                 html.Tr([html.Td("PHONE NUMBER:", style={"paddingRight":"1%", "color": "white", "fontWeight":"bold", "textAlign":"right"}), html.Td(dcc.Input(id="add_phone_input", type="text"))]),
-                                html.Tr([html.Td("UNIVERSITY:", style={"paddingRight":"1%", "color": "white", "fontWeight":"bold", "textAlign":"right"}), html.Td(dcc.Dropdown(data_set.Affiliation_df["Affili"]))]),
+                                html.Tr([html.Td("UNIVERSITY:", style={"paddingRight":"1%", "color": "white", "fontWeight":"bold", "textAlign":"right"}), html.Td(dcc.Dropdown(data_set.Affiliation_df["Affiliation_name"], "", id="add_university_input"))]),
                                 html.Tr([html.Td("RESEARCH AREA:", style={"paddingRight":"1%", "color":"white", "fontWeight": "bold", "textAlign": "right"}), html.Td(dcc.Input(id="add_research_input", type="text"))]),
                                 html.Tr([html.Td("PHOTO URL:", style={"paddingRight":"1%", "color": "white", "fontWeight":"bold", "textAlign":"right"}), html.Td(dcc.Input(id="add_photo_input", type="text"))])
                             ]))),
@@ -169,7 +169,7 @@ def generate_graph_for_university_faculty_with_atleast_n_publications(num_public
 
 
 @app.callback(Output("charti", "children"),
-              Input ("Faculty Keywords_dropdown","value"),
+              Input("publication_Keywords_dropdown","value"),
               State("Affiliation_name_dropdown", "value"))
 def generate_table_by_keyword_faculty (keyword: str, university_names):
     university_names = [university_names] if isinstance(university_names, str) else university_names
@@ -185,7 +185,9 @@ def generate_table_by_keyword_faculty (keyword: str, university_names):
 
 
 
-@app.callback(Output ("chart2", "children"), Input("publication Keywords_dropdown", "value"), State("Affiliation_name_dropdown", "value"))
+@app.callback(Output("chart2", "children"), 
+              Input("publication_Keywords_dropdown", "value"), 
+              State("Affiliation_name_dropdown", "value"))
 def generate_table_by_keyword_publication(keyword: str, university_names):
     university_names = [university_names] if isinstance(university_names, str) else university_names
     if len(university_names) == 0: return []
@@ -199,6 +201,60 @@ def generate_table_by_keyword_publication(keyword: str, university_names):
     fig2: BaseFigure = px.pie(values=[df2[df2["Affiliation_name"]==u]["Publication_score"].sum() for u in university_names], names=university_names, template="plotly dark", height=300)
     fig2.update_layout(plot_bgcolor="#232621", font={"family": "courier"})
     return dcc.Graph(figure=fig2)
+
+
+
+@app.callback([Output("faculty_info", "children"), Output ("edit_modal", "is_apon"), Output ("add_modal", "is_open"), Output ("Faculty_name_dropdown","options"), Output("Faculty_name_dropdown", "value")],
+              [Input("faculty_info_widget_change trigger", "children"), Input("Faculty_name_dropdown", "value"), Input("delete_button", "n_clicks"), Input("edit_button", "n_clicks"), Input("add_button", "n_clicks"), Input("edit_modal_close", "n_clicks"), Input("edit_modal_submit", "n_clicks"), Input("add_modal_close", "n_clicks"), Input("add_modal_submit", "n_clicks")],
+              [State("edit_modal", "is_open"), State("add_modal", "is_open"), State("edit_position_input", "value"), State("edit_email_input", "value"), State("edit_phone_input", "value"), State("edit_research_input", "value"), State("add_name_input", "value"), State("add_position_input", "value"), State("add_email_input", "value"), State("add_phone_input", "value"), State("add_research_input", "value"), State("add_university_input", "value"), State("add_photo_input", "value"), State("Affiliation_name_dropdown", "value")])
+def generate_faculty_page(change_trigger, faculty_name: str, del_btn: int, edit_btn: int, add_btn: int, edit_close_btn: int, edit_submit_btn: int, add_close_btn: int, add_submit_btn: int, edit_is_open: bool, add_is_open: bool, edit_pos_val, edit_email_val, edit_phone_val, edit_research_val, add_name_val, add_pos_val, add_email_val, add_phone, add_research_val, add_university, add_photo, university_names):
+    if len(university_names) == 0: return ([], False, False, [], "")
+    callback_id: list = [p["prop_id"] for p in callback_context.triggered][0]
+    if "delete_button" in callback_id:
+        if faculty_name == "" or faculty_name is None: return ([], False, False, [], "")
+        faculty_id: int = data_set.Faculty_df[data_set.Faculty_df["Faculty_name"] == faculty_name].iloc[0,:]["Faculty_id"]
+        data_set.Faculty_keyword_df = (data_set.Faculty_keyword_df[data_set.Faculty_keyword_df["Faculty_id"] != faculty_id])
+        data_set.Publish_df = (data_set.Publish_df[data_set.Publish_df["Faculty_id"] != faculty_id])
+        data_set.Faculty_df = (data_set.Faculty_df[data_set.Faculty_df["Faculty_id"] != faculty_id]) 
+        faculties: list = list(data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"].isin(university_names)][["Affiliation_id"]]
+                                       .join(data_set.Faculty_df[["Faculty_name", "Affiliation_id"]].set_index("Affiliation_id"), on="Affiliation_id")["Faculty_name"])
+        fac_data_frame: pd.DataFrame = data_set.Faculty_df[data_set.Faculty_df["Faculty_name"] == faculties[0]]
+        if len(fac_data_frame) == 0: return ([], False, False, [], "")
+        fac_data: pd.Series = fac_data_frame.iloc[0,:]
+        faculty_name = faculties[0]
+    else:
+        if "edit_button" in callback_id: edit_is_open = True
+        elif "edit_modal_close" in callback_id: edit_is_open = False 
+        elif "add_button" in callback_id: add_is_open = True
+        elif "add_modal_close" in callback_id: add_is_open = False
+        elif "add_modal_submit" in callback_id:
+            recs: list = data_set.Faculty_df.to_records(index=False).tolist()
+            recs.append((data_set.Faculty_df["Faculty_id"].max()+1, "" if add_name_val is None else add_name_val, "" if add_pos_val is None else add_pos_val, "" if add_research_val is None else add_research_val, "" if add_email_val is None else add_email_val))
+            data_set.Faculty_df = pd.DataFrame.from_records(recs, columns=data_set.Faculty_df.columns)
+            add_is_open = False
+        elif "edit_nodal_submit" in callback_id:
+            rows = data_set.Faculty_df[data_set.Faculty_df["Faculty ame"] == faculty_name].index
+            data_set.Faculty_df.loc[rows, "Position"] = "" if edit_pos_val is None else edit_pos_val
+            data_set.Faculty_df.loc[rows, "Phone_Number"] = "" if edit_phone_val is None else edit_phone_val 
+            data_set.Faculty_df.loc[rows, "Email"] = "" if edit_email_val is None else edit_email_val
+            data_set.Faculty_df.loc[rows, "Email"] = "" if edit_email_val is None else edit_email_val
+            data_set. Faculty_df.loc[rows, "Research_interest"] = "" if edit_research_val is None else edit_research_val
+            edit_is_open = False
+        faculties: list = list(data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"].isin(university_names)][["Affiliation_id"]]
+                                       .join(data_set.Faculty_df[["Faculty_name", "Affiliation_id"]].set_index("Affiliation_id"), on="Affiliation_id")["Faculty_name"])
+        faculty_name = ("" if len(faculties) == 0 else faculties[0]) if faculty_name is None or faculty_name == "" else faculty_name
+        fac_data_frame: pd.DataFrame = data_set.Faculty_df[data_set.Faculty_df["Faculty_name"] == faculty_name]
+        if len(fac_data_frame) == 0: return ([], False, "add_button" in callback_id, [], "")
+        fac_data: pd.Series  = fac_data_frame.iloc[0,:]
+    labels: list = ["FACULTY NAME:", "POSITION:", "EMAIL ADDRESS:", "PHONE NUMBER:", "RESEARCH AREA", "PUBLICATIONS:", "UNIVERSITY:"]
+    data: list = [("--" if not isinstance(fac_data[l], str) and isnan(fac_data[l]) else fac_data[l]) for l in ["Faculty_name", "Position", "Email", "Phone_Number", "Research_interest"]] + [len(data_set.Publish_df[data_set.Publish_df["Faculty_id"] == fac_data["Faculty_id"]])]
+    try: data.append(data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_id"] == fac_data["Affiliation_id"]]["Affiliation_name"].iloc[0])
+    except: data.append("--")
+    return ([html.Img(src=fac_data("Faculty_photourl"), alt=faculty_name, height=300, width=240, style={"display":"block", "margin":"auto", "borderRadius":"20px", "padding":"10px", "flex":1}), html.Table([html.Tbody([html.Tr([html.Td(l), html.Td(d)]) for (l, d) in zip(labels, data)])])],
+            edit_is_open,
+            add_is_open,
+            faculties,
+            faculty_name)
 
 
 
