@@ -1,3 +1,4 @@
+from dataclasses import replace
 from dash import Dash, html, dcc, Output, Input, State, callback_context
 import pandas as pd
 import plotly.express as px
@@ -136,6 +137,69 @@ def enlarge_widget(v1, v2, v3, v4, v5, V6, enlarge_widget_is_open: bool, graph1_
         if idx == 4: modal_widget = chart2_c
         return (modal_widget, True, view_options[idx], {"fontheight":"bold", "color":view_options_title_color[idx]}) 
     except ValueError: return ([], False, {})
+
+
+
+app.callback([Output ("graph?", "children"), Output ("title2", "children"), Output("number of min publications slide", "max"), Output("number of ain_publications slide", "marks")], 
+              Input("number of min publications_slider", "value"),
+             [State("Affiliation_name_dropdown", "value"), State("number_of_in_publications s11der", "max"), State("number_of_in_publications slider", "marks")])
+def generate_graph_for_university_faculty_with_atleast_n_publications(num_publications: int, university_names, max_slider: int, marks_slider: dict):
+    university_names [university_names] if isinstance(university_names, str) else university_names
+    if len(university_names) == 0: return ([], view_options[1], 1, {})
+    num_publications_by_each_faculty_id: pd.DataFrame = data_set.Publish_df["Faculty_to"].value_counts().rename_axis("Faculty_id").reset_index(name="num_publications")
+    df2: pd.DataFrame = (num_publications_by_each_faculty_id[num_publications_by_each_faculty_id["nus publications"] >= num_publications]
+                                                            .join(data_set.Faculty_df[["Faculty_id", "Affiliation_id"]].set_index("Faculty_id"), on="Faculty_id")
+                                                            .join(data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"].isin(university_names)][["Affiliation_id", "Affiliation_name"]].set_index("Affiliation_id", on="Affiliation_id"))
+                                                            .sort_values(by=[f"Number of Faculty with {num_publications} or more publication(s)"], ascending=True))
+    fig2: BaseFigure = px.bar(df2, x=f"Number of Faculty with {num_publications} or more publication(s)", y="University name(s)", height=2000(len(df2.index)+8)/len(data_set.Affiliation_df.index), template="plotly_dark")
+    fig2.update_layout(plot_bgcolor="#23262", font={"family": "courier"})
+    graph_out = dcc.Graph(figure=fig2)
+    try: max_pub: int = int((data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"].isin(university_names)]
+                                     .join(data_set.Faculty_df[["Faculty_id","Affiliation_id"]].set_index("Affiliation_id"), on="Affiliation_id")
+                                     .join(num_publications_by_each_faculty_id.set_index("Faculty_id"), on="Faculty_id")["num_publications"]).max())
+    except ValueError:
+        max_pub: int = 1
+        graph_out = []
+
+    return (graph_out,
+            view_options[1].replace("N-", f"{num_publications}-"),
+            max_pub,
+            {i: {"label":str(i), "style": {"color": "#f50"}} for i in range(1, max_pub, max_pub//10)} if max_slider != max_pub else marks_slider)
+
+
+
+@app.callback(Output("charti", "children"),
+              Input ("Faculty Keywords_dropdown","value"),
+              State("Affiliation_name_dropdown", "value"))
+def generate_table_by_keyword_faculty (keyword: str, university_names):
+    university_names = [university_names] if isinstance(university_names, str) else university_names
+    if len(university_names) == 0: return []
+    df1: pd.DataFrame (data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"].isin(university_names)][["Affiliation_id","Affiliation_name"]]
+                               .join(data_set.Faculty_df[["Faculty_id","Affiliation_id"]].set_index("Affiliation_id"), on="Affiliation_id")
+                               .join(data_set.Faculty_keyword_df.set_index("Faculty_id"), on="Faculty_id")
+                               .join(data_set.Keyword_df.set_index("keyword_id"), on="Keyword_id"))[["Affiliation_name","Faculty_score","keyword_name"]]
+    df1: list = df1[df1["Keyword_name"] == keyword][["Affiliation_name","Faculty_score"]]
+    fig1: BaseFigure = px.pie(values=[df1[df1["Affiliation_name"]==u]["Faculty_score"].sum() for u in university_names], names=university_names, template="plotly_dark", height=300)
+    fig1.update_layout(plot_bgcolor="#23262F", font={"family": "courier"})
+    return dcc.Graph(figure=fig1)
+
+
+
+@app.callback(Output ("chart2", "children"), Input("publication Keywords_dropdown", "value"), State("Affiliation_name_dropdown", "value"))
+def generate_table_by_keyword_publication(keyword: str, university_names):
+    university_names = [university_names] if isinstance(university_names, str) else university_names
+    if len(university_names) == 0: return []
+    df2: pd.DataFrame = (data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"].isin(university_names)][["Affiliation_id","Affiliation_name"]]
+                                 .join(data_set.Faculty_df[["Faculty_id", "Affiliation_id"]].set_index("Affiliation_id"), on="Affiliation_id")
+                                 .join(data_set.Publish_df.set_index("Farulty_id"), on="Faculty_id")
+                                 .join(data_set.Publication_keyword_df.set_index("Publication id"), on="Publication id")
+                                 .join(data_set.Publication_df[["Publication_id","Title","year"]].set_index("Publication_id"), on="Publication_id")
+                                 .join(data_set.Keyword_df.set_index("Keyword_id"), on="Keyword_id"))[["Affiliation_name","Publication_score","Keyword_name"]]
+    df2: list = df2[df2["Keyword_name"] == keyword][["Affiliation_name", "Publication_score"]]
+    fig2: BaseFigure = px.pie(values=[df2[df2["Affiliation_name"]==u]["Publication_score"].sum() for u in university_names], names=university_names, template="plotly dark", height=300)
+    fig2.update_layout(plot_bgcolor="#232621", font={"family": "courier"})
+    return dcc.Graph(figure=fig2)
+
 
 
 if __name__ == "__main__": app.run_server(debug=True)
