@@ -10,8 +10,8 @@ data_set:DB = DB()
 app:Dash = Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.CYBORG])
 app.title="CS 411:Final Project"
 background_color:str = "rgb(17,17,17)"
-view_options:list = [s.upper() for s in ["University Publications Over Time", "University Number of Faculty With Atleast N-Publications", "Faculty Page", "Top Faculty Results Based On Keywords", "Top Publication Results Based On Keywords", "University Faculty Type Distribution"]]
-view_options_title_color= ["pink", "yellow", "#66fcf1", "lightgreen", "#efe2ba", "#ffca80"]
+view_options:list = [s.upper() for s in ["University Publications Over Time", "University Number of Faculty With Atleast N-Publications", "Faculty Page", "Top Faculty Results Based On Keywords", "Top Publication Results Based On Keywords", "University Faculty Type Distribution", "University Photo"]]
+view_options_title_color= ["pink", "yellow", "#66fcf1", "lightgreen", "#efe2ba", "#ffca80", "white"]
 
 
 widgets = [
@@ -63,8 +63,8 @@ widgets = [
 
 
 app.layout = html.Div([
-    dbc.Modal([dbc.ModalHeader(dbc.ModalTitle(id="enlarge_widget_title"), close_button=True), dbc.ModalBody(id="enlarge_widget_body")], "enlarge_widget", size="xl", is_open=False, centered=True),
-    html.Div([html.Div(style={"margin":"auto", "flex":4}, children=[dcc.Dropdown(data_set.Affiliation_df["Affiliation_name"], "", True, False, id="Affiliation_name_dropdown", style={"textAlign":"center", "color":"black", "margin":"auto", "paddingLeft":"5%"})]), html.Div(html.Img(src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1200px-No_image_available.svg.png", id="Affiliation_photo", height=95, width=150, style={"display":"block", "margin":"auto", "background":"white", "border":"2px solid grey", "borderRadius":"20px"}), style={"flex":1, "paddingLeft":"1%"})], style={"display":"flex", "flexDirection":"row", "margin":"auto", "paddingTop":"5px", "paddingBottom":"5px"}), 
+    dbc.Modal([dbc.ModalHeader(dbc.ModalTitle(id="enlarge_widget_title"), close_button=True), dbc.ModalBody(id="enlarge_widget_body", style={"margin":"auto"})], "enlarge_widget", size="xl", is_open=False, centered=True),
+    html.Div([html.Div(style={"margin":"auto", "flex":4}, children=[dcc.Dropdown(data_set.Affiliation_df["Affiliation_name"], "", True, False, id="Affiliation_name_dropdown", style={"textAlign":"center", "color":"black", "margin":"auto", "paddingLeft":"5%"})]), html.Div(html.Button(html.Img(src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1200px-No_image_available.svg.png", id="Affiliation_photo", height=95, width=150, style={"display":"block", "margin":"auto", "background":"white", "border":"2px solid grey", "borderRadius":"20px"}), view_options[6], style={"border":"none", "backgroundColor":"transparent", "marginLeft":"30%"}), style={"flex":1, "paddingLeft":"1%"})], style={"display":"flex", "flexDirection":"row", "margin":"auto", "paddingTop":"5px", "paddingBottom":"5px"}), 
     html.Table(html.Tbody(
         [html.Tr([
                     html.Td(html.Div(widgets[0], style={"border":"5px solid red", "borderRadius":"20px", "margin":"auto", "background":background_color, "height":"420px"}), style={"paddingLeft":"5px", "paddingRight":"5px", "paddingBottom":"5px"}), 
@@ -122,11 +122,10 @@ def update_view(university_names):
 
 @app.callback([Output("enlarge_widget_body", "children"), Output("enlarge_widget", "is_open"), Output("enlarge_widget_title", "children"), Output("enlarge_widget_title", "style")],
               [Input(view, "n_clicks") for view in view_options],
-              [State("enlarge_widget", "is_open"), State("graph1", "children"), State("graph2", "children"), State("faculty_info_wrapper", "children"), State("chart1", "children"), State("chart2", "children"), State("graph3", "children")]) 
-def enlarge_widget(v1, v2, v3, v4, v5, V6, enlarge_widget_is_open:bool, graph1_c, graph2_c, faculty_info_c, chart1_c, chart2_c, graph3_c):
+              [State("enlarge_widget", "is_open"), State("Affiliation_photo", "src"), State("graph1", "children"), State("graph2", "children"), State("faculty_info_wrapper", "children"), State("chart1", "children"), State("chart2", "children"), State("graph3", "children")]) 
+def enlarge_widget(v1, v2, v3, v4, v5, V6, v7, enlarge_widget_is_open:bool, university_photo_src, graph1_c, graph2_c, faculty_info_c, chart1_c, chart2_c, graph3_c):
     try:
         idx: int = view_options.index([p["prop_id"] for p in callback_context.triggered][0][:-9])
-        modal_widget = graph3_c
         if idx==0: modal_widget = graph1_c
         elif idx==1: modal_widget = graph2_c
         elif idx==2:
@@ -134,6 +133,8 @@ def enlarge_widget(v1, v2, v3, v4, v5, V6, enlarge_widget_is_open:bool, graph1_c
             modal_widget = faculty_info_c
         elif idx==3: modal_widget = chart1_c
         elif idx==4: modal_widget = chart2_c
+        elif idx==5: modal_widget = graph3_c
+        else: modal_widget = html.Img(src=university_photo_src, height=400, width=600, style={"background":"white", "borderRadius":"20px"})
         return (modal_widget, True, view_options[idx], {"fontheight":"bold", "color":view_options_title_color[idx]}) 
     except ValueError: return ([], False, "", {})
 
@@ -171,7 +172,7 @@ def generate_graph_for_university_faculty_with_atleast_n_publications(num_public
 @app.callback(Output("chart1", "children"),
               Input("faculty_Keywords_dropdown","value"),
               State("Affiliation_name_dropdown", "value"))
-def generate_table_by_keyword_faculty (keyword: str, university_names):
+def generate_chart_by_keyword_faculty (keyword: str, university_names):
     university_names = [university_names] if isinstance(university_names, str) else university_names
     if len(university_names)==0: return []
     df1: pd.DataFrame = (data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"].isin(university_names)][["Affiliation_id","Affiliation_name"]]
@@ -188,7 +189,7 @@ def generate_table_by_keyword_faculty (keyword: str, university_names):
 @app.callback(Output("chart2", "children"), 
               Input("publication_Keywords_dropdown", "value"), 
               State("Affiliation_name_dropdown", "value"))
-def generate_table_by_keyword_publication(keyword:str, university_names):
+def generate_chart_by_keyword_publication(keyword:str, university_names):
     university_names = [university_names] if isinstance(university_names, str) else university_names
     if len(university_names)==0: return []
     df2: pd.DataFrame = (data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"].isin(university_names)][["Affiliation_id","Affiliation_name"]]
@@ -207,7 +208,7 @@ def generate_table_by_keyword_publication(keyword:str, university_names):
 @app.callback([Output("faculty_info", "children"), Output ("edit_modal", "is_open"), Output ("add_modal", "is_open"), Output ("Faculty_name_dropdown","options"), Output("Faculty_name_dropdown", "value")],
               [Input("faculty_info_widget_change_trigger", "children"), Input("Faculty_name_dropdown", "value"), Input("delete_button", "n_clicks"), Input("edit_button", "n_clicks"), Input("add_button", "n_clicks"), Input("edit_modal_close", "n_clicks"), Input("edit_modal_submit", "n_clicks"), Input("add_modal_close", "n_clicks"), Input("add_modal_submit", "n_clicks")],
               [State("edit_modal", "is_open"), State("add_modal", "is_open"), State("edit_position_input", "value"), State("edit_email_input", "value"), State("edit_phone_input", "value"), State("edit_research_input", "value"), State("add_name_input", "value"), State("add_position_input", "value"), State("add_email_input", "value"), State("add_phone_input", "value"), State("add_research_input", "value"), State("add_university_input", "value"), State("add_photo_input", "value"), State("Affiliation_name_dropdown", "value")])
-def generate_faculty_page(change_trigger, faculty_name:str, del_btn:int, edit_btn:int, add_btn:int, edit_close_btn:int, edit_submit_btn:int, add_close_btn:int, add_submit_btn:int, edit_is_open:bool, add_is_open:bool, edit_pos_val, edit_email_val, edit_phone_val, edit_research_val, add_name_val, add_pos_val, add_email_val, add_phone, add_research_val, add_university, add_photo, university_names):
+def generate_faculty_page(change_trigger, faculty_name:str, del_btn:int, edit_btn:int, add_btn:int, edit_close_btn:int, edit_submit_btn:int, add_close_btn:int, add_submit_btn:int, edit_is_open:bool, add_is_open:bool, edit_pos_val, edit_email_val, edit_phone_val, edit_research_val, add_name_val, add_pos_val, add_email_val, add_phone_val, add_research_val, add_university_val, add_photo_val, university_names):
     if len(university_names)==0: return ([], False, False, [], "")
     callback_id: list = [p["prop_id"] for p in callback_context.triggered][0]
     if "delete_button" in callback_id:
@@ -229,11 +230,11 @@ def generate_faculty_page(change_trigger, faculty_name:str, del_btn:int, edit_bt
         elif "add_modal_close" in callback_id: add_is_open = False
         elif "add_modal_submit" in callback_id:
             recs: list = data_set.Faculty_df.to_records(index=False).tolist()
-            recs.append((data_set.Faculty_df["Faculty_id"].max()+1, "" if add_name_val is None else add_name_val, "" if add_pos_val is None else add_pos_val, "" if add_research_val is None else add_research_val, "" if add_email_val is None else add_email_val))
+            recs.append((data_set.Faculty_df["Faculty_id"].max()+1, "" if add_name_val is None else add_name_val, "" if add_pos_val is None else add_pos_val, "" if add_research_val is None else add_research_val, "" if add_email_val is None else add_email_val, "" if add_phone_val is None else add_phone_val, data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"]==add_university_val]["Affiliation_id"][0], "" if add_photo_val is None else add_photo_val))
             data_set.Faculty_df = pd.DataFrame.from_records(recs, columns=data_set.Faculty_df.columns)
             add_is_open = False
-        elif "edit_nodal_submit" in callback_id:
-            rows = data_set.Faculty_df[data_set.Faculty_df["Faculty ame"]==faculty_name].index
+        elif "edit_modal_submit" in callback_id:
+            rows = data_set.Faculty_df[data_set.Faculty_df["Faculty_name"]==faculty_name].index
             data_set.Faculty_df.loc[rows, "Position"] = "" if edit_pos_val is None else edit_pos_val
             data_set.Faculty_df.loc[rows, "Phone_Number"] = "" if edit_phone_val is None else edit_phone_val 
             data_set.Faculty_df.loc[rows, "Email"] = "" if edit_email_val is None else edit_email_val
@@ -250,7 +251,7 @@ def generate_faculty_page(change_trigger, faculty_name:str, del_btn:int, edit_bt
     data: list = [("--" if not isinstance(fac_data[l], str) and isnan(fac_data[l]) else fac_data[l]) for l in ["Faculty_name", "Position", "Email", "Phone_Number", "Research_interest"]] + [len(data_set.Publish_df[data_set.Publish_df["Faculty_id"]==fac_data["Faculty_id"]])]
     try: data.append(data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_id"]==fac_data["Affiliation_id"]]["Affiliation_name"].iloc[0])
     except: data.append("--")
-    return ([html.Img(src=fac_data["Faculty_photoUrl"], alt=faculty_name, height=300, width=240, style={"display":"block", "margin":"auto", "borderRadius":"20px", "padding":"10px", "flex":1}), html.Table([html.Tbody([html.Tr([html.Td(l, style={"color":"white", "fontWeight":"bold", "textAlign":"right", "fontSize":"12px", "minWidth":"110px"}), html.Td(d, style={"color":"pink", "fontSize":"12px"})]) for (l, d) in zip(labels, data)])], style={"flex":2})],
+    return ([html.Img(src=fac_data["Faculty_photoUrl"], alt=faculty_name, height=300, width=240, style={"display":"block", "margin":"auto", "borderRadius":"20px", "padding":"10px", "flex":1}), html.Table([html.Tbody([html.Tr([html.Td(l, style={"color":"white", "fontWeight":"bold", "textAlign":"right", "fontSize":"12px", "width":"100px"}), html.Td(d, style={"color":"pink", "fontSize":"12px"})]) for (l, d) in zip(labels, data)])], style={"flex":2})],
             edit_is_open,
             add_is_open,
             faculties,
@@ -258,4 +259,4 @@ def generate_faculty_page(change_trigger, faculty_name:str, del_btn:int, edit_bt
 
 
 
-if __name__=="__main__":app.run_server(debug=True)
+if __name__=="__main__": app.run_server(debug=True)
