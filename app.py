@@ -49,9 +49,9 @@ widgets = [
                 html.Table([html.Tbody([html.Tr(
                     [
                         html.Td(dcc.Dropdown(clearable=False, id="Faculty_name_dropdown"), style={"width":"100%", "paddingRight":"10%", "paddingLeft":"50px", "color":"black"}),
-                        html.Td(html.Button(html.Img(src="https://img.icons8.com/nolan/512/edit--v1.png", height=40, width=40), id="edit_button", style={"background":background_color, "borderRadius":"20px"}), style={"minWidth":""}),
-                        html.Td(html.Button(html.Img(src="https://img.icons8.com/plasticine/512/000000/filled-trash.png", height=40, width=40), id="delete_button", style={"background":background_color, "borderRadius":"20px"}), style={"minWidth":""}),
-                        html.Td(html.Button(html.Img(src="https://img.icons8.com/color/512/eeeeee/add--vi.png", height=40, width=40), id="add_button", style={"background":background_color, "borderRadius":"20px"}), style={"minWidth":""})
+                        html.Td(html.Button(html.Img(src="https://img.icons8.com/nolan/512/edit--v1.png", height=40, width=40), id="edit_button", style={"background":background_color, "borderRadius":"20px"}), style={"minWidth":"65px"}),
+                        html.Td(html.Button(html.Img(src="https://img.icons8.com/plasticine/512/000000/filled-trash.png", height=40, width=40), id="delete_button", style={"background":background_color, "borderRadius":"20px"}), style={"minWidth":"65px"}),
+                        html.Td(html.Button(html.Img(src="https://img.icons8.com/color/512/eeeeee/add--vi.png", height=40, width=40), id="add_button", style={"background":background_color, "borderRadius":"20px"}), style={"minWidth":"65px"})
                     ])])], style={"marginTop":"2%", "marginBottom":"2%", "textAlign":"center"}),
                 html.Div(html.Div(id="faculty_info", style={"display":"flex", "flexDirection":"row"}), "faculty_info_wrapper")
             ],
@@ -246,11 +246,11 @@ def generate_faculty_page(change_trigger, faculty_name:str, del_btn:int, edit_bt
         fac_data_frame: pd.DataFrame = data_set.Faculty_df[data_set.Faculty_df["Faculty_name"]==faculty_name]
         if len(fac_data_frame)==0: return ([], False, "add_button" in callback_id, [], "")
         fac_data: pd.Series  = fac_data_frame.iloc[0,:]
-    labels: list = ["FACULTY NAME:", "POSITION:", "EMAIL ADDRESS:", "PHONE NUMBER:", "RESEARCH AREA", "PUBLICATIONS:", "UNIVERSITY:"]
+    labels: list = ["FACULTY NAME:", "POSITION:", "EMAIL ADDRESS:", "PHONE NUMBER:", "RESEARCH AREA:", "PUBLICATIONS:", "UNIVERSITY:"]
     data: list = [("--" if not isinstance(fac_data[l], str) and isnan(fac_data[l]) else fac_data[l]) for l in ["Faculty_name", "Position", "Email", "Phone_Number", "Research_interest"]] + [len(data_set.Publish_df[data_set.Publish_df["Faculty_id"]==fac_data["Faculty_id"]])]
     try: data.append(data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_id"]==fac_data["Affiliation_id"]]["Affiliation_name"].iloc[0])
     except: data.append("--")
-    return ([html.Img(src=fac_data["Faculty_photoUrl"], alt=faculty_name, height=300, width=240, style={"display":"block", "margin":"auto", "borderRadius":"20px", "padding":"10px", "flex":1}), html.Table([html.Tbody([html.Tr([html.Td(l), html.Td(d)]) for (l, d) in zip(labels, data)])])],
+    return ([html.Img(src=fac_data["Faculty_photoUrl"], alt=faculty_name, height=300, width=240, style={"display":"block", "margin":"auto", "borderRadius":"20px", "padding":"10px", "flex":1}), html.Table([html.Tbody([html.Tr([html.Td(l, style={"color":"white", "fontWeight":"bold", "textAlign":"right", "fontSize":"12px", "minWidth":"110px"}), html.Td(d, style={"color":"pink", "fontSize":"12px"})]) for (l, d) in zip(labels, data)])], style={"flex":2})],
             edit_is_open,
             add_is_open,
             faculties,
