@@ -11,14 +11,14 @@ app: Dash = Dash(__name__, suppress_callback_exceptions=True, external_styleshee
 app.title="CS 411: Final Project"
 background_color: str = "rgb(17,17,17)"
 view_options: list = [s.upper() for s in ["University Publications Over Time", "University Number of Faculty With Atleast N-Publications", "Faculty Page", "Top Faculty Results Based On Keywords", "Top Publication Results Based On Keywords", "University Faculty Type Distribution"]]
-view_options_title_color= ["pink", "yellow", "#66fcf1", "lightgreen", "Befe2ba", "#FFCA80"]
+view_options_title_color= ["pink", "yellow", "#66fcf1", "lightgreen", "#efe2ba", "#ffca80"]
 
 
 widgets = [
-            [html.Button(html.H5(view_options[0], style={"textAlign":"center", "color":view_options_title_color[0], "fontWeight":"bold", "margin":"8"}), view_options[0], 0, style={"margin":"auto"}), html.Div(id="graph1")],
-            [html.Button(html.H5(view_options[1].replace("N-", f"{0}-"), "title2", style={"textAlign":"center", "color":view_options_title_color[1], "fontWeight":"bold", "margin":"8"}), view_options[1]), dcc.Slider(1, 1, 1, value=1, id="number_of_min_publications_slider"), html.Div(id="graph2")],
+            [html.Button(html.H5(view_options[0], style={"textAlign":"center", "color":view_options_title_color[0], "fontWeight":"bold", "margin":"0"}), view_options[0], 0, style={"margin":"auto", "display": "block", "border":"none", "backgroundColor":"transparent", "marginTop":"1%", "marginBottom":"0"}), html.Div(id="graph1", style={"margin":"1%", "marginTop":"0"})],
+            [html.Button(html.H5(view_options[1].replace("N-", f"{0}-"), "title2", style={"textAlign":"center", "color":view_options_title_color[1], "fontWeight":"bold", "margin":"0"}), view_options[1], style={"margin":"auto", "display": "block", "border":"none", "backgroundColor":"transparent"}), dcc.Slider(1, 1, 1, value=1, id="number_of_min_publications_slider"), html.Div(id="graph2")],
             [
-                html.Button(html.H5(view_options[2], style={"textAlign":"center", "fontWeight":"bold", "margin":"0", "color":view_options_title_color[2]}), view_options[2], 0, style={"margin":"auto"}),
+                html.Button(html.H5(view_options[2], style={"textAlign":"center", "fontWeight":"bold", "margin":"0", "color":view_options_title_color[2]}), view_options[2], 0, style={"margin":"auto", "display": "block", "border":"none", "backgroundColor":"transparent"}),
                 dbc.Modal(
                     [
                         dbc.ModalHeader(dbc.ModalTitle("EDIT FACULTY MENU", style={"textAlign":"center", "color":view_options_title_color[2], "fontWeight":"bold"})),
@@ -55,9 +55,9 @@ widgets = [
                     ])])], style={"marginTop":"2%", "marginBottom":"2%", "textAlign":"center"}),
                 html.Div(html.Div(id="faculty_info", style={"display": "flex", "flexDirection": "row"}), "faculty_info_wrapper")
             ],
-            [html.Button(html.H5(view_options[3], style={"textAlign":"center", "color":view_options_title_color[3], "fontWeight":"bold", "margin":"0"}), view_options[3], 0, style={"margin":"auto", "display": "block", "border":"none"}), dcc.Dropdown(id="faculty_Keywords_dropdown"), html.Div(id="chart1")],
-            [html.Button(html.H5(view_options[4], style={"textAlign":"center", "color":view_options_title_color[4], "fontWeight":"bold", "margin":"0"}), view_options[4], 0, style={"margin":"auto", "display": "block", "border":"none"}), dcc.Dropdown(id="publication_Keywords_dropdown"), html.Div(id="chart2")],
-            [html.Button(html.H5(view_options[5], style={"textAlign":"center", "color":view_options_title_color[5], "fontWeight":"bold", "margin":"0"}), view_options[5], 0, style={"margin":"auto", "display": "block", "border":"none"}), html.Div(id="graph3")] 
+            [html.Button(html.H5(view_options[3], style={"textAlign":"center", "color":view_options_title_color[3], "fontWeight":"bold", "margin":"0"}), view_options[3], 0, style={"margin":"auto", "display": "block", "border":"none", "backgroundColor":"transparent"}), dcc.Dropdown(id="faculty_Keywords_dropdown", style={"textAlign":"center", "color":"black", "paddingLeft":"10%", "paddingRight":"10%", "marginTop":"2%"}), html.Div(id="chart1")],
+            [html.Button(html.H5(view_options[4], style={"textAlign":"center", "color":view_options_title_color[4], "fontWeight":"bold", "margin":"0"}), view_options[4], 0, style={"margin":"auto", "display": "block", "border":"none", "backgroundColor":"transparent"}), dcc.Dropdown(id="publication_Keywords_dropdown", style={"textAlign":"center", "color":"black", "paddingLeft":"10%", "paddingRight":"10%", "marginTop":"2%"}), html.Div(id="chart2")],
+            [html.Button(html.H5(view_options[5], style={"textAlign":"center", "color":view_options_title_color[5], "fontWeight":"bold", "margin":"0"}), view_options[5], 0, style={"margin":"auto", "display": "block", "border":"none", "backgroundColor":"transparent", "marginTop":"1%"}), html.Div(id="graph3")] 
          ]
 
 
@@ -84,8 +84,8 @@ app.layout = html.Div([
 
 
 #CALLBACKS
-@app.callback([Output("Affiliation_photo", "src"), Output("Affiliation_photo", "alt"), Output("graph1", "children"), Output ("graph3", "children"), Output("number_of_min_publications_slider", "value"), Output("faculty_Keywords_dropdown", "options"), Output("faculty_Keywords_dropdown", "value"), Output("publication_Keywords_dropdown", "options"), Output("publication_Keywords_dropdown", "value"), Output("faculty_info_widget_change_trigger", "children")],
-              Input("Affiliation_name_dropdown", "value"))
+@app.callback([Output("Affiliation_photo", "src"), Output("Affiliation_photo", "alt"), Output("graph1", "children"), Output("graph3", "children"), Output("number_of_min_publications_slider", "value"), Output("faculty_Keywords_dropdown", "options"), Output("faculty_Keywords_dropdown", "value"), Output("publication_Keywords_dropdown", "options"), Output("publication_Keywords_dropdown", "value"), Output("faculty_info_widget_change_trigger", "children")],
+               Input("Affiliation_name_dropdown", "value"))
 def update_view(university_names):
     if university_names is None or university_names == "" or len(university_names) == 0: 
         return ("https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1200px-No_image_available.svg.png", "", [], [], 1, [], "", [], "", "")
@@ -94,22 +94,20 @@ def update_view(university_names):
                                  .join(data_set.Publish_df[["Publication_id","Faculty_id"]].set_index("Publication_id"), on="Publication_id")
                                  .join(data_set.Faculty_df[["Faculty_id","Affiliation_id"]].set_index("Faculty_id"), on="Faculty_id")
                                  .join(data_set.Affiliation_df[["Affiliation_id","Affiliation_name"]].set_index("Affiliation_id"), on="Affiliation_id")[["Year", "Affiliation_name"]])
-    fig1: BaseFigure = px.bar(df1[df1["Affiliation_name"].isin(university_names)].value_counts().rename_axis(["Year","university"]).reset_index(name="Number of Publication(s)"), x="Year", y="Number of Publication(s)", template = "plotly_dark")
+    fig1: BaseFigure = px.bar(df1[df1["Affiliation_name"].isin(university_names)].value_counts().rename_axis(["Year","University"]).reset_index(name="Number of Publication(s)"), x="Year", y="Number of Publication(s)", height=370, template="plotly_dark", color="University", barmode="group")
     fig1.update_layout(plot_bgcolor="#23252F", font = {"family": "courier"}, legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
     df2: pd.DataFrame = (data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"].isin(university_names) ][["Affiliation_id"]]
                                  .join(data_set.Faculty_df[["Faculty_id","Affiliation_id"]].set_index("Affiliation_id"), on="Affiliation_id")
                                  .join(data_set.Publish_df.set_index("Faculty_id"), on="Faculty_id"))[["Faculty_id", "Publication_id"]]
-    faculty_keywords: list = list(data_set.Keyword_df[data_set.Keyword_df["Keyword_id"].isin(list(df2[["Faculty_id"]].join(data_set.Faculty_keyword_df[["Keyword_id", "Faculty_id"]].set_index("Faculty_id"), on="Faculty_id")["Keyword_id"]))])
-    publication_keywords: list = list(data_set.Keyword_df[data_set.Keyword_df["Keyword_id"].isin(list(df2[["Publication_id"]].join(data_set.Publication_keyword_df[["Keyword_id", "Publication_id"]].set_index("Publication_id"), on="Publication_id")["Keyword_id"]))])
-    faculty_keywords: list = [] if len(faculty_keywords) else faculty_keywords
-    publication_keywords: list = [] if len(publication_keywords) == 0 else publication_keywords
+    faculty_keywords: list = list(data_set.Keyword_df[data_set.Keyword_df["Keyword_id"].isin(list(df2[["Faculty_id"]].join(data_set.Faculty_keyword_df[["Keyword_id", "Faculty_id"]].set_index("Faculty_id"), on="Faculty_id")["Keyword_id"]))]["Keyword_name"])
+    publication_keywords: list = list(data_set.Keyword_df[data_set.Keyword_df["Keyword_id"].isin(list(df2[["Publication_id"]].join(data_set.Publication_keyword_df[["Keyword_id", "Publication_id"]].set_index("Publication_id"), on="Publication_id")["Keyword_id"]))]["Keyword_name"])
     df2: pd.DataFrame = (data_set.Affiliation_df[data_set. Affiliation_df["Affiliation_name"].isin(university_names)][["Affiliation_id","Affiliation_name"]]
                                  .join(data_set.Faculty_df[["Affiliation_id", "Position"]].set_index("Affiliation_id"), on="Affiliation_id"))[["Affiliation_name","Position"]]
     positions: list = df2["Position"].unique()
     graph3_data: dict = {"Position": positions}
     graph3_data.update({u: [len (df2[((df2["Affiliation_name"] == u) & (df2["Position"]== p))]) for p in positions] for u in university_names})
     fig2: BaseFigure = px.bar(pd.DataFrame(graph3_data), y="Position", x=university_names, template= "plotly_dark", height=350) 
-    fig2.update_layout(plot_bgcolor="#23262F", font = {"family" : "courier"})
+    fig2.update_layout(plot_bgcolor="#23262F", font = {"family":"courier"})
     return (data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"] == university_names[-1]]["Affiliation_photoUrl"].iloc[0], 
             university_names[-1],
             dcc.Graph(figure=fig1),
@@ -122,12 +120,12 @@ def update_view(university_names):
             "")
 
 
-@app.callback([Output("enlarge_widget_body", "children"), Output ("enlarge_widget", "is_open"), Output("enlarge_widget_title", "children"), Output("enlarge_widget_title", "style")],
-              [Input (view, "n_clicks") for view in view_options],
+@app.callback([Output("enlarge_widget_body", "children"), Output("enlarge_widget", "is_open"), Output("enlarge_widget_title", "children"), Output("enlarge_widget_title", "style")],
+              [Input(view, "n_clicks") for view in view_options],
               [State("enlarge_widget", "is_open"), State("graph1", "children"), State("graph2", "children"), State("faculty_info_wrapper", "children"), State("chart1", "children"), State("chart2", "children"), State("graph3", "children")]) 
 def enlarge_widget(v1, v2, v3, v4, v5, V6, enlarge_widget_is_open: bool, graph1_c, graph2_c, faculty_info_c, chart1_c, chart2_c, graph3_c):
     try:
-        idx: int=view_options.index([p['prop_id'] for p in callback_context.triggered][0][:-9])
+        idx: int=view_options.index([p["prop_id"] for p in callback_context.triggered][0][:-9])
         modal_widget = graph3_c
         if idx == 0: modal_widget = graph1_c
         if idx == 1: modal_widget = graph2_c
@@ -141,19 +139,20 @@ def enlarge_widget(v1, v2, v3, v4, v5, V6, enlarge_widget_is_open: bool, graph1_
 
 
 
-@app.callback([Output ("graph?", "children"), Output ("title2", "children"), Output("number of min publications slide", "max"), Output("number of ain_publications slide", "marks")], 
-              Input("number of min publications_slider", "value"),
-             [State("Affiliation_name_dropdown", "value"), State("number_of_in_publications s11der", "max"), State("number_of_in_publications slider", "marks")])
+@app.callback([Output("graph2", "children"), Output("title2", "children"), Output("number_of_min_publications_slider", "max"), Output("number_of_min_publications_slider", "marks")], 
+               Input("number_of_min_publications_slider", "value"),
+              [State("Affiliation_name_dropdown", "value"), State("number_of_min_publications_slider", "max"), State("number_of_min_publications_slider", "marks")])
 def generate_graph_for_university_faculty_with_atleast_n_publications(num_publications: int, university_names, max_slider: int, marks_slider: dict):
-    university_names [university_names] if isinstance(university_names, str) else university_names
+    university_names = [university_names] if isinstance(university_names, str) else university_names
     if len(university_names) == 0: return ([], view_options[1], 1, {})
-    num_publications_by_each_faculty_id: pd.DataFrame = data_set.Publish_df["Faculty_to"].value_counts().rename_axis("Faculty_id").reset_index(name="num_publications")
-    df2: pd.DataFrame = (num_publications_by_each_faculty_id[num_publications_by_each_faculty_id["nus publications"] >= num_publications]
+    num_publications_by_each_faculty_id: pd.DataFrame = data_set.Publish_df["Faculty_id"].value_counts().rename_axis("Faculty_id").reset_index(name="num_publications")
+    df2: pd.DataFrame = (num_publications_by_each_faculty_id[num_publications_by_each_faculty_id["num_publications"] >= num_publications]
                                                             .join(data_set.Faculty_df[["Faculty_id", "Affiliation_id"]].set_index("Faculty_id"), on="Faculty_id")
-                                                            .join(data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"].isin(university_names)][["Affiliation_id", "Affiliation_name"]].set_index("Affiliation_id", on="Affiliation_id"))
+                                                            .join(data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"].isin(university_names)][["Affiliation_id", "Affiliation_name"]].set_index("Affiliation_id"), on="Affiliation_id")[["Affiliation_name"]]
+                                                            .value_counts().rename_axis("University name(s)").reset_index(name=f"Number of Faculty with {num_publications} or more publication(s)")
                                                             .sort_values(by=[f"Number of Faculty with {num_publications} or more publication(s)"], ascending=True))
     fig2: BaseFigure = px.bar(df2, x=f"Number of Faculty with {num_publications} or more publication(s)", y="University name(s)", height=2000*(len(df2.index)+8)/len(data_set.Affiliation_df.index), template="plotly_dark")
-    fig2.update_layout(plot_bgcolor="#23262", font={"family": "courier"})
+    fig2.update_layout(plot_bgcolor="#23262f", font={"family": "courier"})
     graph_out = dcc.Graph(figure=fig2)
     try: max_pub: int = int((data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"].isin(university_names)]
                                      .join(data_set.Faculty_df[["Faculty_id","Affiliation_id"]].set_index("Affiliation_id"), on="Affiliation_id")
@@ -169,17 +168,17 @@ def generate_graph_for_university_faculty_with_atleast_n_publications(num_public
 
 
 
-@app.callback(Output("charti", "children"),
+@app.callback(Output("chart1", "children"),
               Input("faculty_Keywords_dropdown","value"),
               State("Affiliation_name_dropdown", "value"))
 def generate_table_by_keyword_faculty (keyword: str, university_names):
     university_names = [university_names] if isinstance(university_names, str) else university_names
     if len(university_names) == 0: return []
-    df1: pd.DataFrame (data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"].isin(university_names)][["Affiliation_id","Affiliation_name"]]
+    df1: pd.DataFrame = (data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"].isin(university_names)][["Affiliation_id","Affiliation_name"]]
                                .join(data_set.Faculty_df[["Faculty_id","Affiliation_id"]].set_index("Affiliation_id"), on="Affiliation_id")
                                .join(data_set.Faculty_keyword_df.set_index("Faculty_id"), on="Faculty_id")
-                               .join(data_set.Keyword_df.set_index("keyword_id"), on="Keyword_id"))[["Affiliation_name","Faculty_score","keyword_name"]]
-    df1: list = df1[df1["Keyword_name"] == keyword][["Affiliation_name","Faculty_score"]]
+                               .join(data_set.Keyword_df.set_index("Keyword_id"), on="Keyword_id"))[["Affiliation_name","Faculty_score","Keyword_name"]]
+    df1: pd.DataFrame = df1[df1["Keyword_name"] == keyword][["Affiliation_name","Faculty_score"]]
     fig1: BaseFigure = px.pie(values=[df1[df1["Affiliation_name"]==u]["Faculty_score"].sum() for u in university_names], names=university_names, template="plotly_dark", height=300)
     fig1.update_layout(plot_bgcolor="#23262F", font={"family": "courier"})
     return dcc.Graph(figure=fig1)
