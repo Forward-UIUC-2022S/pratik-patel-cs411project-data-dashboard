@@ -88,7 +88,7 @@ widgets = [
                             style={"margin": "auto", "display": "block", "border": "none", "backgroundColor": "transparent"}), dcc.Dropdown(id="publication_Keywords_dropdown", 
                                 style={"textAlign": "center", "color": "black", "marginLeft": "7%", "marginRight": "20%", "marginTop": "2%"}), html.Div(id="chart2")],
     [html.Button(html.H5(view_options[5], style={"textAlign": "center", "color": view_options_title_color[5], "fontWeight":"bold", "margin":"0"}), view_options[5], 0, style={
-                 "margin": "auto", "display": "block", "border": "none", "backgroundColor": "transparent", "marginTop": "1%"}), html.Div(id="graph3")]
+                 "margin": "auto", "display": "block", "border": "none", "backgroundColor": "transparent", "marginTop": "1%"}), html.Div(id="graph3", style={"padding":"1%"})]
 ]
 
 
@@ -155,7 +155,7 @@ def update_view(university_names):
     graph3_data.update({u: [len(df2[((df2["Affiliation_name"] == u) & (
         df2["Position"] == p))]) for p in positions] for u in university_names})
     fig2: BaseFigure = px.bar(pd.DataFrame(
-        graph3_data), y="Position", x=university_names, template="plotly_dark", height=370)
+        graph3_data), y="Position", x=university_names, template="plotly_dark", height=360)
     fig2.update_layout(plot_bgcolor="#23262F", font={"family": "courier"})
     return (data_set.Affiliation_df[data_set.Affiliation_df["Affiliation_name"] == university_names[-1]]["Affiliation_photoUrl"].iloc[0],
             university_names[-1],
@@ -365,4 +365,4 @@ def generate_faculty_page(change_trigger, faculty_name: str, del_btn: int, edit_
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=False)
