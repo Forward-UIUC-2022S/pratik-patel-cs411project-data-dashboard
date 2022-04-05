@@ -82,11 +82,13 @@ widgets = [
             "display": "flex", "flexDirection": "row"}), "faculty_info_wrapper")
     ],
     [html.Button(html.H5(view_options[3], style={"textAlign": "center", "color": view_options_title_color[3], "fontWeight":"bold", "margin":"0"}), view_options[3], 0, 
-                            style={"margin": "auto", "display": "block", "border": "none", "backgroundColor": "transparent"}), dcc.Dropdown(id="faculty_Keywords_dropdown", 
-                                style={"textAlign": "center", "color": "black", "marginLeft": "7%", "marginRight": "20%", "marginTop": "2%"}), html.Div(id="chart1")],
+                            style={"margin": "auto", "display": "block", "border": "none", "backgroundColor": "transparent"}), html.Div(dcc.Dropdown(id="faculty_Keywords_dropdown", 
+                                style={"textAlign": "center", "color": "black", "marginRight": "20%", "marginTop": "2%"}),
+                                    style={"marginLeft":"15%"}), html.Div(id="chart1")],
     [html.Button(html.H5(view_options[4], style={"textAlign": "center", "color": view_options_title_color[4], "fontWeight":"bold", "margin":"0"}), view_options[4], 0, 
-                            style={"margin": "auto", "display": "block", "border": "none", "backgroundColor": "transparent"}), dcc.Dropdown(id="publication_Keywords_dropdown", 
-                                style={"textAlign": "center", "color": "black", "marginLeft": "7%", "marginRight": "20%", "marginTop": "2%"}), html.Div(id="chart2")],
+                            style={"margin": "auto", "display": "block", "border": "none", "backgroundColor": "transparent"}), html.Div(dcc.Dropdown(id="publication_Keywords_dropdown", 
+                                style={"textAlign": "center", "color": "black", "marginRight": "20%", "marginTop": "2%"}),
+                                    style={"marginLeft":"15%"}), html.Div(id="chart2")],
     [html.Button(html.H5(view_options[5], style={"textAlign": "center", "color": view_options_title_color[5], "fontWeight":"bold", "margin":"0"}), view_options[5], 0, style={
                  "margin": "auto", "display": "block", "border": "none", "backgroundColor": "transparent", "marginTop": "1%"}), html.Div(id="graph3", style={"padding":"1%"})]
 ]
