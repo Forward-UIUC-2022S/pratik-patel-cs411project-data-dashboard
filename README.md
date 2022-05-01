@@ -7,4 +7,4 @@
 5. ***TOP PUBLICATION RESULTS BASED ON KEYWORDS:*** This widget shows the ranking of each chosen university based on the selected publication keyword.
 6. ***UNIVERSITY FACULTY TYPE DISTRIBUTION:*** This widget shows the distribution of faculty position by selected universities.
 
- ***VIDEO LINK: *** https://youtu.be/dIofJ7RpzCg
+##VIDEO LINK: https://youtu.be/dIofJ7RpzCg
